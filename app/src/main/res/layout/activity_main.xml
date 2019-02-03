@@ -11,7 +11,70 @@
 		android:id="@+id/fragment_container"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:layout_above="@id/navigation"/>
+		android:layout_above="@id/songControls" />
+
+	<LinearLayout
+		android:id="@+id/songControls"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_above="@id/navigation"
+		android:layout_marginBottom="2dp"
+		android:background="?android:attr/windowBackground"
+		android:orientation="vertical"
+		android:visibility="visible">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<Button
+				android:id="@+id/playButton"
+				android:layout_width="45dp"
+				android:layout_height="45dp"
+				android:background="@drawable/ic_play_arrow_black_24dp"
+				android:contentDescription="@string/app_name"
+				android:scaleType="fitXY"
+				android:visibility="visible"
+				android:padding="10dp"/>
+
+
+			<Button
+				android:id="@+id/nextSong"
+				android:layout_width="45dp"
+				android:layout_height="45dp"
+				android:background="@drawable/ic_skip_next_black_24dp"
+				android:contentDescription="@string/app_name"
+				android:scaleType="fitXY"
+				android:padding="10dp"/>
+
+
+			<LinearLayout
+				android:layout_width="fill_parent"
+				android:layout_height="match_parent"
+				android:layout_weight="2.4"
+				android:orientation="vertical">
+
+				<TextView
+					android:id="@+id/playSong"
+					android:layout_width="fill_parent"
+					android:layout_height="30dp"
+					android:layout_marginTop="10dp"
+					android:textAlignment="center"
+					android:textColor="#4D6D68"
+					android:textSize="18sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+		</LinearLayout>
+
+		<SeekBar
+			android:id="@+id/skbVolume"
+			android:layout_width="match_parent"
+			android:layout_height="30dp"
+			android:layout_gravity="center_horizontal"
+			android:background="?android:attr/windowBackground"
+			android:minHeight="20dp" />
+	</LinearLayout>
 
 	<android.support.design.widget.BottomNavigationView
 		android:id="@+id/navigation"

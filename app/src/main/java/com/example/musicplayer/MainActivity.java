@@ -8,6 +8,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-	AlertDialog.Builder builder;
+	private Boolean playingFromCurrentPlaylist = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,23 +29,12 @@ public class MainActivity extends AppCompatActivity {
 
 		setContentView(R.layout.activity_main);
 
+		// Listen to play score event on Session
+		Session.setSessionListener(sessionListener);
+
 		// Loading users and getting the select user playlists
 		ArrayList<User> users = loadUsers();
 		Session.currentUser =users.get(0);
-
-		builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
-		builder.setTitle("Item Selected")
-				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				})
-				.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				})
-				.setIcon(android.R.drawable.ic_dialog_alert);
 
 		BottomNavigationView navigation = findViewById(R.id.navigation);
 		navigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
@@ -53,16 +43,15 @@ public class MainActivity extends AppCompatActivity {
 		Session.scores = loadScores();
 
 		MusicFragment musicFragment = new MusicFragment();
-		musicFragment.setMusicFragmentListener(musicFragmentListener);
-
 		getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, musicFragment).commit();
 	}
 
-	MusicFragment.MusicFragmentListener musicFragmentListener = new MusicFragment.MusicFragmentListener() {
+	Session.SessionListener sessionListener = new Session.SessionListener() {
 		@Override
-		public void onPlayScore(Score score) {
-			builder.setMessage("Play: " + score.song.title);
-			builder.show();
+		public void playScore(Score score, Boolean currentPlaylist) {
+			playingFromCurrentPlaylist = currentPlaylist;
+			TextView playSong= findViewById(R.id.playSong);
+			playSong.setText("Play: " + score.song.title);
 		}
 	};
 

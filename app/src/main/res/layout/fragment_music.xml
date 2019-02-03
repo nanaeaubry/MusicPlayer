@@ -9,8 +9,8 @@
 		android:id="@+id/musicListView"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:divider="@color/material_blue_grey_800"
-		android:dividerHeight="1dp"
-		android:clickable="true" />
+		android:clickable="true"
+		android:divider="#4D6D68"
+		android:dividerHeight="1dp" />
 
 </RelativeLayout>

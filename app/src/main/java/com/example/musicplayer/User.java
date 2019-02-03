@@ -7,4 +7,8 @@ public class User {
 	String lastName;
 	String firstName;
 	ArrayList<Playlist> playlists;
+
+	void User(){
+		playlists = new ArrayList<>();
+	}
 }

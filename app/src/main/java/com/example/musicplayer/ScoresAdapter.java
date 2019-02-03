@@ -77,7 +77,14 @@ public class ScoresAdapter extends ArrayAdapter<Score> {
 		removeFromPlaylistButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				Playlist playlist = Session.getCurrentPlaylist();
+				String songId = score.song.id;
+				playlist.scoreIds.remove(songId);
+				Session.getCurrentPlaylistScores().remove(score);
 
+				notifyDataSetChanged();
+
+				Toast.makeText(context, "Removed: " + score.song.title, Toast.LENGTH_SHORT).show();
 			}
 		});
 

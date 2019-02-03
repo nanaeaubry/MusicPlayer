@@ -1,7 +1,5 @@
 package com.example.musicplayer;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,17 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
 
 public class MusicFragment extends Fragment {
-
-	public interface MusicFragmentListener {
-		void onPlayScore(Score score);
-	}
-
-	private MusicFragmentListener listener;
 
 	@Nullable
 	@Override
@@ -40,12 +29,8 @@ public class MusicFragment extends Fragment {
 	ListView.OnItemClickListener listItemListener = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			listener.onPlayScore(Session.scores.get(position));
+			Session.playScore(Session.scores.get(position), false);
 		}
 	};
-
-	public void setMusicFragmentListener(MusicFragmentListener listener) {
-		this.listener = listener;
-	}
 
 }
