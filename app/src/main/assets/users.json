@@ -7,7 +7,7 @@
 	"playlists": [
 	  {
 		"name": "My Best Music",
-		"scores" : []
+		"scoreIds" : []
 	  }
 	]
   },

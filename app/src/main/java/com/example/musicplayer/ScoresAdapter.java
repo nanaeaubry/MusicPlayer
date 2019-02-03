@@ -1,28 +1,27 @@
 package com.example.musicplayer;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class ScoresAdapter extends ArrayAdapter<Score> {
 
-	public interface ScoresAdapterListener {
-		public void onAddScore(Score score);
-		public void onRemoveScore(Score score);
-	}
-
-	private ScoresAdapterListener listener;
+	private Context context;
 	private Boolean removeButtonVisible = false;
 	private Boolean addButtonVisible = true;
 
 	public ScoresAdapter(Context context, ArrayList<Score> scores) {
 		super(context, 0, scores);
+		this.context = context;
 	}
 
 	@Override
@@ -34,9 +33,9 @@ public class ScoresAdapter extends ArrayAdapter<Score> {
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_score, parent, false);
 		}
 
-		TextView songName = (TextView) convertView.findViewById(R.id.songName);
-		TextView artistName = (TextView) convertView.findViewById(R.id.artistName);
-		TextView albumName = (TextView) convertView.findViewById(R.id.albumName);
+		TextView songName = convertView.findViewById(R.id.songName);
+		TextView artistName = convertView.findViewById(R.id.artistName);
+		TextView albumName = convertView.findViewById(R.id.albumName);
 
 		songName.setText(score.song.title);
 		artistName.setText(score.artist.name);
@@ -47,7 +46,29 @@ public class ScoresAdapter extends ArrayAdapter<Score> {
 		addToPlaylistButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				listener.onAddScore(score);
+				if (Session.getPlaylists().size() <= 0) {
+					Toast.makeText(context, "First create at least one playlist in your profile", Toast.LENGTH_SHORT).show();
+					return;
+				}
+
+				// Create dialog to pick up playlist
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setTitle("Pick a playlist");
+				builder.setItems(Session.getPlaylistNames(), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						// Add the song to the playlist
+						Playlist playlist = Session.getPlaylists().get(which);
+						playlist.scoreIds.add(score.song.id);
+						Toast.makeText(context, "Added: " + score.song.title + " to " + playlist.name, Toast.LENGTH_SHORT).show();
+					}
+				});
+				builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
 			}
 		});
 
@@ -56,24 +77,19 @@ public class ScoresAdapter extends ArrayAdapter<Score> {
 		removeFromPlaylistButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				listener.onRemoveScore(score);
+
 			}
 		});
 
 		return convertView;
 	}
 
-	public void setRemoveButtonVisible(Boolean isVisible)
-	{
+	public void setRemoveButtonVisible(Boolean isVisible) {
 		removeButtonVisible = isVisible;
 	}
 
-	public void setAddButtonVisible(Boolean isVisible)
-	{
+	public void setAddButtonVisible(Boolean isVisible) {
 		addButtonVisible = isVisible;
 	}
 
-	public void SetScoresAdapterListener(ScoresAdapterListener listener) {
-		this.listener = listener;
-	}
 }

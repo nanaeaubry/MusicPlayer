@@ -20,20 +20,17 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-	ArrayList<Score> scores;
-	ArrayList<Playlist> playlists;
-
-	Bundle bundle;
 	AlertDialog.Builder builder;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.activity_main);
 
 		// Loading users and getting the select user playlists
 		ArrayList<User> users = loadUsers();
-		playlists = users.get(0).playlists;
+		Session.currentUser =users.get(0);
 
 		builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
 		builder.setTitle("Item Selected")
@@ -53,13 +50,9 @@ public class MainActivity extends AppCompatActivity {
 		navigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
 
 		// Reading scores and loading into list view
-		scores = loadScores();
-		bundle = new Bundle();
-		bundle.putParcelableArrayList("scores", scores);
-		bundle.putParcelableArrayList("playlists", playlists);
+		Session.scores = loadScores();
 
 		MusicFragment musicFragment = new MusicFragment();
-		musicFragment.setArguments(bundle);
 		musicFragment.setMusicFragmentListener(musicFragmentListener);
 
 		getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, musicFragment).commit();
@@ -67,14 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
 	MusicFragment.MusicFragmentListener musicFragmentListener = new MusicFragment.MusicFragmentListener() {
 		@Override
-		public void onAddScoreToPlaylist(Playlist playlist, Score score) {
-			builder.setMessage(" " + score.song.title);
-			builder.show();
-		}
-
-		@Override
-		public void onRemoveScoreFromPlaylist(Playlist playlist, Score score) {
-			builder.setMessage("Add " + score.song.title);
+		public void onPlayScore(Score score) {
+			builder.setMessage("Play: " + score.song.title);
 			builder.show();
 		}
 	};
@@ -141,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
 			switch (item.getItemId()) {
 				case R.id.navigation_musicList:
 					selectedFragment = new MusicFragment();
-					selectedFragment.setArguments(bundle);
 					break;
 				case R.id.navigation_playlists:
 					selectedFragment = new PlaylistFragment();
