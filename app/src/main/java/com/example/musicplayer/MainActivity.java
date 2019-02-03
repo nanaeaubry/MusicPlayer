@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 					selectedFragment = new MusicFragment();
 					break;
 				case R.id.navigation_playlists:
-					selectedFragment = new PlaylistFragment();
+					selectedFragment = new ProfileFragment();
 					break;
 			}
 			getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
