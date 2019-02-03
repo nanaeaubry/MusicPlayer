@@ -1,0 +1,20 @@
+[
+  {
+	"id": "nanaeaubry@gmail.com",
+	"password": "dfhaksdjhfhdskl",
+	"firstName": "Nanae",
+	"lastName": "Aubry",
+	"playlists": [
+	  {
+		"name": "80's fun"
+	  }
+	]
+  },
+  {
+	"id": "faubry@yahoo.com",
+	"password": "dkjahfgkjdshf",
+	"firstName": "Frederic",
+	"lastName": "Aubry",
+	"playlists": []
+  }
+]

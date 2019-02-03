@@ -1,3 +1,9 @@
 <resources>
 	<string name="app_name">MusicPlayer</string>
+	<string name="navigation_drawer_open">Open Navigation Drawer</string>
+	<string name="navigation_drawer_close">Close Navigation Drawer</string>
+	<string name="playlist_button_delete">Delete</string>
+	<string name="title_activity_main">main</string>
+	<string name="title_music_list">Music</string>
+	<string name="title_playlists">Playlists</string>
 </resources>
