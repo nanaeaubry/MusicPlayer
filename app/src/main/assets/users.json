@@ -6,7 +6,8 @@
 	"lastName": "Aubry",
 	"playlists": [
 	  {
-		"name": "80's fun"
+		"name": "My Best Music",
+		"scores" : []
 	  }
 	]
   },

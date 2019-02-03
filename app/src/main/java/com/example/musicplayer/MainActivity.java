@@ -1,12 +1,13 @@
 package com.example.musicplayer;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -19,25 +20,64 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-	Bundle scoresBundle;
+	ArrayList<Score> scores;
+	ArrayList<Playlist> playlists;
+
+	Bundle bundle;
+	AlertDialog.Builder builder;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-		navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+		// Loading users and getting the select user playlists
+		ArrayList<User> users = loadUsers();
+		playlists = users.get(0).playlists;
+
+		builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+		builder.setTitle("Item Selected")
+				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				})
+				.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				})
+				.setIcon(android.R.drawable.ic_dialog_alert);
+
+		BottomNavigationView navigation = findViewById(R.id.navigation);
+		navigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
 
 		// Reading scores and loading into list view
-		ArrayList<Score> scores = loadScores();
-		scoresBundle = new Bundle();
-		scoresBundle.putParcelableArrayList("scores", scores);
+		scores = loadScores();
+		bundle = new Bundle();
+		bundle.putParcelableArrayList("scores", scores);
+		bundle.putParcelableArrayList("playlists", playlists);
 
 		MusicFragment musicFragment = new MusicFragment();
-		musicFragment.setArguments(scoresBundle);
+		musicFragment.setArguments(bundle);
+		musicFragment.setMusicFragmentListener(musicFragmentListener);
+
 		getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, musicFragment).commit();
 	}
+
+	MusicFragment.MusicFragmentListener musicFragmentListener = new MusicFragment.MusicFragmentListener() {
+		@Override
+		public void onAddScoreToPlaylist(Playlist playlist, Score score) {
+			builder.setMessage(" " + score.song.title);
+			builder.show();
+		}
+
+		@Override
+		public void onRemoveScoreFromPlaylist(Playlist playlist, Score score) {
+			builder.setMessage("Add " + score.song.title);
+			builder.show();
+		}
+	};
 
 	private ArrayList<Score> loadScores() {
 
@@ -65,7 +105,33 @@ public class MainActivity extends AppCompatActivity {
 		return null;
 	}
 
-	private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+	private ArrayList<User> loadUsers() {
+
+		ArrayList<User> users = new ArrayList<>();
+		try {
+			InputStream is = getAssets().open("users.json");
+			JsonReader jsonReader = new JsonReader(new InputStreamReader(is, "UTF-8"));
+
+			Gson gson = new Gson();
+
+			jsonReader.beginArray();
+
+			while (jsonReader.hasNext()) {
+				User user = gson.fromJson(jsonReader, User.class);
+				users.add(user);
+			}
+			jsonReader.close();
+			return users;
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener
 			= new BottomNavigationView.OnNavigationItemSelectedListener() {
 
 		@Override
@@ -75,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
 			switch (item.getItemId()) {
 				case R.id.navigation_musicList:
 					selectedFragment = new MusicFragment();
-					selectedFragment.setArguments(scoresBundle);
+					selectedFragment.setArguments(bundle);
 					break;
 				case R.id.navigation_playlists:
 					selectedFragment = new PlaylistFragment();
