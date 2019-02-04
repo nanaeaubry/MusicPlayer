@@ -3,7 +3,6 @@ package com.example.musicplayer;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 
@@ -68,6 +66,7 @@ public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 						// Add the song to the playlist
 						Playlist playlist = Session.getPlaylists().get(which);
 						playlist.scoreIds.add(score.song.id);
+						Session.saveUsers();
 						Toast.makeText(context, "Added: " + score.song.title + " to " + playlist.name, Toast.LENGTH_SHORT).show();
 					}
 				});
@@ -91,6 +90,7 @@ public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 				String songId = score.song.id;
 				playlist.scoreIds.remove(songId);
 				Session.getCurrentPlaylistScores().remove(score);
+				Session.saveUsers();
 
 				notifyDataSetChanged();
 

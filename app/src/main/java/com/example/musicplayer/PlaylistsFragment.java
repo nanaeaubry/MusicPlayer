@@ -37,7 +37,8 @@ public class PlaylistsFragment extends Fragment {
 		View view = inflater.inflate(R.layout.fragment_playlists, container, false);
 
 		TextView currentUserName = view.findViewById(R.id.currentUserName);
-		currentUserName.setText(Session.currentUser.firstName + " " + Session.currentUser.lastName);
+		User user = Session.getCurrentUser();
+		currentUserName.setText(user.firstName + " " + user.lastName);
 
 		Button addPlaylistButton = view.findViewById(R.id.addPlaylist);
 		addPlaylistButton.setOnClickListener(addPlaylistListener);
@@ -81,6 +82,7 @@ public class PlaylistsFragment extends Fragment {
 					Playlist playlist = new Playlist();
 					playlist.name = name;
 					Session.getPlaylists().add(playlist);
+					Session.saveUsers();
 				}
 			});
 

@@ -4,12 +4,7 @@
 	"password": "abcd",
 	"firstName": "Nanae",
 	"lastName": "Aubry",
-	"playlists": [
-	  {
-		"name": "My Best Music",
-		"scoreIds" : []
-	  }
-	]
+	"playlists": []
   },
   {
 	"id": "bar@example.com",

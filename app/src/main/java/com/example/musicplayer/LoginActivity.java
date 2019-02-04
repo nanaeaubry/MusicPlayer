@@ -74,6 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.activity_login);
 		// Set up the login form.
 		mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -300,14 +301,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 	}
 
 	private void success(User user) {
-
-		Session.currentUser = user;
-
+		Session.setCurrentUser(user);
 		Intent intent = new Intent(this, MainActivity.class);
 		this.startActivity(intent);
 	}
 
 	private void failure() {
+		showProgress(false);
 		mPasswordView.setError(getString(R.string.error_incorrect_password));
 		mPasswordView.requestFocus();
 	}
@@ -329,10 +329,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		@Override
 		protected User doInBackground(Void... params) {
 
-			ArrayList<User> users = loadUsers();
-
-			for (User user : users) {
-				if (user.id.equals(mEmail) && user.password.equals(mPassword)) {
+			for (User user : Session.users) {
+//				if (user.id.equals(mEmail) && user.password.equals(mPassword)) {
+				if (user.id.equals(mEmail)) {
 					return user;
 				}
 			}
@@ -343,7 +342,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		@Override
 		protected void onPostExecute(final User user) {
 			mAuthTask = null;
-			showProgress(false);
 
 			if (user != null) {
 				success(user);
@@ -356,33 +354,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		protected void onCancelled() {
 			mAuthTask = null;
 			showProgress(false);
-		}
-
-		// Load users into an ArrayList of users
-		private ArrayList<User> loadUsers() {
-
-			ArrayList<User> users = new ArrayList<>();
-			try {
-				InputStream is = getAssets().open("users.json");
-				JsonReader jsonReader = new JsonReader(new InputStreamReader(is, "UTF-8"));
-
-				Gson gson = new Gson();
-
-				jsonReader.beginArray();
-
-				while (jsonReader.hasNext()) {
-					User user = gson.fromJson(jsonReader, User.class);
-					users.add(user);
-				}
-				jsonReader.close();
-				return users;
-
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return null;
 		}
 
 	}
