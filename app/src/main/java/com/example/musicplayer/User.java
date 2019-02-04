@@ -6,6 +6,7 @@ public class User {
 	String id;
 	String lastName;
 	String firstName;
+	String password;
 	ArrayList<Playlist> playlists;
 
 	void User() {

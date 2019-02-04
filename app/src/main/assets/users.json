@@ -1,7 +1,7 @@
 [
   {
 	"id": "nanaeaubry@gmail.com",
-	"password": "dfhaksdjhfhdskl",
+	"password": "abcd",
 	"firstName": "Nanae",
 	"lastName": "Aubry",
 	"playlists": [
@@ -12,10 +12,10 @@
 	]
   },
   {
-	"id": "faubry@yahoo.com",
-	"password": "dkjahfgkjdshf",
-	"firstName": "Frederic",
-	"lastName": "Aubry",
+	"id": "bar@example.com",
+	"password": "1234",
+	"firstName": "Sing",
+	"lastName": "Along",
 	"playlists": []
   }
 ]

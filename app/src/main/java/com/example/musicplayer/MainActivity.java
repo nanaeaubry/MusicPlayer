@@ -46,10 +46,6 @@ public class MainActivity extends AppCompatActivity {
 		// Listen to play score event on Session
 		Session.setSessionListener(sessionListener);
 
-		// Loading users and getting the select user playlists
-		ArrayList<User> users = loadUsers();
-		Session.currentUser = users.get(0);
-
 		// Load bottom navigation bar
 		BottomNavigationView navigation = findViewById(R.id.navigation);
 		navigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
@@ -148,33 +144,6 @@ public class MainActivity extends AppCompatActivity {
 			}
 			jsonReader.close();
 			return scores;
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	// Load users into an ArrayList of users
-	private ArrayList<User> loadUsers() {
-
-		ArrayList<User> users = new ArrayList<>();
-		try {
-			InputStream is = getAssets().open("users.json");
-			JsonReader jsonReader = new JsonReader(new InputStreamReader(is, "UTF-8"));
-
-			Gson gson = new Gson();
-
-			jsonReader.beginArray();
-
-			while (jsonReader.hasNext()) {
-				User user = gson.fromJson(jsonReader, User.class);
-				users.add(user);
-			}
-			jsonReader.close();
-			return users;
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
