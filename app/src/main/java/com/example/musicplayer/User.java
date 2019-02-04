@@ -8,7 +8,7 @@ public class User {
 	String firstName;
 	ArrayList<Playlist> playlists;
 
-	void User(){
+	void User() {
 		playlists = new ArrayList<>();
 	}
 }

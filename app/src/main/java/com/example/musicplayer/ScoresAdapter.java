@@ -3,17 +3,21 @@ package com.example.musicplayer;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class ScoresAdapter extends ArrayAdapter<Score> {
+public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 
 	private Context context;
 	private Boolean removeButtonVisible = false;
@@ -29,18 +33,23 @@ public class ScoresAdapter extends ArrayAdapter<Score> {
 		//Get data item for this position
 		final Score score = getItem(position);
 
+		// Load scores if they have not been loaded
 		if (convertView == null) {
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_score, parent, false);
 		}
 
+		// Set TextViews to appropriate attributes of score
 		TextView songName = convertView.findViewById(R.id.songName);
 		TextView artistName = convertView.findViewById(R.id.artistName);
 		TextView albumName = convertView.findViewById(R.id.albumName);
 
+		// Set text to attribute names
 		songName.setText(score.song.title);
 		artistName.setText(score.artist.name);
 		albumName.setText(score.release.name);
 
+
+		// Button to add score to a playlist of choice
 		Button addToPlaylistButton = convertView.findViewById(R.id.addToPlaylist);
 		addToPlaylistButton.setVisibility(addButtonVisible ? View.VISIBLE : View.GONE);
 		addToPlaylistButton.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +81,7 @@ public class ScoresAdapter extends ArrayAdapter<Score> {
 			}
 		});
 
+		// Button to remove a song from a playlist when it is added to playlist
 		Button removeFromPlaylistButton = convertView.findViewById(R.id.removeFromPlaylist);
 		removeFromPlaylistButton.setVisibility(removeButtonVisible ? View.VISIBLE : View.GONE);
 		removeFromPlaylistButton.setOnClickListener(new View.OnClickListener() {
@@ -91,12 +101,67 @@ public class ScoresAdapter extends ArrayAdapter<Score> {
 		return convertView;
 	}
 
+	// Set visibility of remove song button
 	public void setRemoveButtonVisible(Boolean isVisible) {
 		removeButtonVisible = isVisible;
 	}
 
+	// Set visibility of add song button
 	public void setAddButtonVisible(Boolean isVisible) {
 		addButtonVisible = isVisible;
+	}
+
+	@Override
+	public Filter getFilter() {
+		Filter filter = new Filter() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			protected void publishResults(CharSequence constraint, FilterResults results) {
+				ArrayList<Score> filteredScores = (ArrayList<Score>) results.values;
+				notifyDataSetChanged();
+				clear();
+				for (int i = 0, l = filteredScores.size(); i < l; i++) {
+					add(filteredScores.get(i));
+				}
+				notifyDataSetInvalidated();
+			}
+
+			@Override
+			protected FilterResults performFiltering(CharSequence constraint) {
+
+				FilterResults results = new FilterResults();
+
+				// perform your search here using the searchConstraint String.
+				ArrayList<Score> filteredScores = new ArrayList<>();
+				String filter = constraint.toString().toLowerCase();
+				for (int i = 0; i < Session.scores.size(); i++) {
+					Score score = Session.scores.get(i);
+					String songTitle = score.song.title.toLowerCase();
+					if (songTitle.indexOf(filter) >= 0) {
+						filteredScores.add(score);
+						continue;
+					}
+					String artistName = score.artist.name.toLowerCase();
+					if (songTitle.indexOf(filter) >= 0) {
+						filteredScores.add(score);
+						continue;
+					}
+					String albumName = score.release.name.toLowerCase();
+					if (songTitle.indexOf(filter) >= 0) {
+						filteredScores.add(score);
+						continue;
+					}
+				}
+
+				results.count = filteredScores.size();
+				results.values = filteredScores;
+
+				return results;
+			}
+		};
+
+		return filter;
 	}
 
 }

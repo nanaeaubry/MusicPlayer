@@ -6,7 +6,7 @@ public class Playlist {
 	String name;
 	ArrayList<String> scoreIds;
 
-	Playlist(){
+	Playlist() {
 		scoreIds = new ArrayList<>();
 	}
 }

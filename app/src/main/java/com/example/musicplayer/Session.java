@@ -28,17 +28,17 @@ public class Session {
 		return items;
 	}
 
-	public static Playlist getCurrentPlaylist(){
+	public static Playlist getCurrentPlaylist() {
 		return Session.currentPlaylist;
 	}
 
-	public static void setCurrentPlaylist(Playlist playlist){
+	public static void setCurrentPlaylist(Playlist playlist) {
 		Session.currentPlaylist = playlist;
 		Session.playlistScores = null;
 	}
 
 	public static ArrayList<Score> getCurrentPlaylistScores() {
-		if (Session.playlistScores != null){
+		if (Session.playlistScores != null) {
 			return Session.playlistScores;
 		}
 
@@ -60,11 +60,11 @@ public class Session {
 		return Session.playlistScores;
 	}
 
-	public static void setSessionListener(SessionListener listener){
+	public static void setSessionListener(SessionListener listener) {
 		Session.listener = listener;
 	}
 
-	public static void playScore(Score score, Boolean currentPlaylist){
+	public static void playScore(Score score, Boolean currentPlaylist) {
 		Session.listener.playScore(score, currentPlaylist);
 	}
 }

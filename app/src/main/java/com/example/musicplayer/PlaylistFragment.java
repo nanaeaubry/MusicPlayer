@@ -15,7 +15,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class PlaylistFragment extends Fragment {
-	public interface PlaylistFragmentListener{
+	public interface PlaylistFragmentListener {
 		void onGoBack();
 	}
 
@@ -50,7 +50,7 @@ public class PlaylistFragment extends Fragment {
 		return view;
 	}
 
-	public void setPlaylistFragmentListener(PlaylistFragmentListener listener){
+	public void setPlaylistFragmentListener(PlaylistFragmentListener listener) {
 		this.listener = listener;
 	}
 

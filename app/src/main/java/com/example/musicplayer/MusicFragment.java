@@ -4,24 +4,52 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ListView;
 
-public class MusicFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MusicFragment extends Fragment  {
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_music, container, false);
 
-		ScoresAdapter scoresAdapter = new ScoresAdapter(getActivity(), Session.scores);
+		final ScoresAdapter scoresAdapter = new ScoresAdapter(getActivity(), Session.scores);
+
 
 		ListView listView = view.findViewById(R.id.musicListView);
 		listView.setAdapter(scoresAdapter);
 		listView.setOnItemClickListener(listItemListener);
+
+		EditText inputFilter = view.findViewById(R.id.inputFilter);
+		inputFilter.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+				// NO OP
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				scoresAdapter.getFilter().filter(s);
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				//NO OP
+			}
+		});
 
 		return view;
 	}
