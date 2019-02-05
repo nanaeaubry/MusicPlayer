@@ -1,14 +1,10 @@
 package com.example.musicplayer;
 
-import android.content.res.AssetManager;
-
 import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Session {
