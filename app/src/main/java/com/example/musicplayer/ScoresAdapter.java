@@ -131,7 +131,6 @@ public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 			protected FilterResults performFiltering(CharSequence constraint) {
 
 				FilterResults results = new FilterResults();
-
 				// perform your search here using the searchConstraint String.
 				ArrayList<Score> filteredScores = new ArrayList<>();
 				String filter = constraint.toString().toLowerCase();
@@ -143,12 +142,12 @@ public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 						continue;
 					}
 					String artistName = score.artist.name.toLowerCase();
-					if (songTitle.indexOf(filter) >= 0) {
+					if (artistName.indexOf(filter) >= 0) {
 						filteredScores.add(score);
 						continue;
 					}
 					String albumName = score.release.name.toLowerCase();
-					if (songTitle.indexOf(filter) >= 0) {
+					if (albumName.indexOf(filter) >= 0) {
 						filteredScores.add(score);
 						continue;
 					}
@@ -160,7 +159,6 @@ public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 				return results;
 			}
 		};
-
 		return filter;
 	}
 

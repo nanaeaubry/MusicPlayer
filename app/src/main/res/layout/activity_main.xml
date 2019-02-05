@@ -29,13 +29,13 @@
 
 			<Button
 				android:id="@+id/playButton"
-				android:layout_width="45dp"
-				android:layout_height="45dp"
+				android:layout_width="50dp"
+				android:layout_height="50dp"
 				android:background="@drawable/ic_play_arrow_black_24dp"
 				android:contentDescription="@string/app_name"
+				android:padding="10dp"
 				android:scaleType="fitXY"
-				android:visibility="visible"
-				android:padding="10dp"/>
+				android:visibility="visible" />
 
 
 			<LinearLayout
@@ -47,12 +47,27 @@
 				<TextView
 					android:id="@+id/playSong"
 					android:layout_width="fill_parent"
-					android:layout_height="30dp"
-					android:layout_marginTop="10dp"
+					android:layout_height="20dp"
 					android:textAlignment="center"
 					android:textColor="#4D6D68"
-					android:textSize="18sp"
+					android:textSize="16sp"
 					android:textStyle="bold" />
+
+				<TextView
+					android:id="@+id/playArtist"
+					android:layout_width="fill_parent"
+					android:layout_height="15dp"
+					android:textAlignment="center"
+					android:textColor="#4D6D68"
+					android:textSize="12sp" />
+
+				<TextView
+					android:id="@+id/playAlbum"
+					android:layout_width="fill_parent"
+					android:layout_height="15dp"
+					android:textAlignment="center"
+					android:textColor="#4D6D68"
+					android:textSize="12sp" />
 			</LinearLayout>
 
 		</LinearLayout>

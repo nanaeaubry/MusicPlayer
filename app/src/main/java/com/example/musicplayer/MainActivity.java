@@ -107,6 +107,12 @@ public class MainActivity extends AppCompatActivity {
 			TextView playSong = findViewById(R.id.playSong);
 			playSong.setText(score.song.title);
 
+			TextView playArtist = findViewById(R.id.playArtist);
+			playArtist.setText(score.artist.name);
+
+			TextView playAlbum = findViewById(R.id.playAlbum);
+			playAlbum.setText(score.release.name);
+
 			if (currentSongId == R.raw.champion){
 				currentSongId = R.raw.dancingqueen;
 			} else {
