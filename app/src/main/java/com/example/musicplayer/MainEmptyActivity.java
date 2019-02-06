@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+/**
+ * Class reads users.json file from local storage. If no file is found then one is created.
+ */
 
 public class MainEmptyActivity extends AppCompatActivity {
 
@@ -36,10 +39,8 @@ public class MainEmptyActivity extends AppCompatActivity {
 	}
 
 	void loadUsers() {
-
-
 		try {
-
+			// Get user file from directory and read from file.
 			String path = getFilesDir().getAbsolutePath() + "/users.json";
 			File file = new File(path);
 			if (file.exists()) {
@@ -48,7 +49,7 @@ public class MainEmptyActivity extends AppCompatActivity {
 				inputStream.close();
 				return;
 			}
-
+			// Load the logged in user information and register them as current user
 			InputStream inputStream = getAssets().open("users.json");
 			Session.users = loadUsersFromStream(inputStream);
 			Session.saveUsers();
@@ -58,6 +59,11 @@ public class MainEmptyActivity extends AppCompatActivity {
 		}
 	}
 
+	/**
+	 * Load users into an array list
+	 * @param inputStream
+	 * @return Arraylist of users to then authenticate and store in Session
+	 */
 	private ArrayList<User> loadUsersFromStream(InputStream inputStream) {
 
 		try {

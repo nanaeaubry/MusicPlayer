@@ -27,17 +27,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+/**
+ * The main page.
+ */
+
 public class MainActivity extends AppCompatActivity {
 
-	// Song playing props
+	// Song playing properties
 	private MediaPlayer mediaPlayer;
 	private LinearLayout playControls;
-	private int currentSongId = R.raw.champion;
+	private int currentSongId = R.raw.happy;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		// Hide keyboard when app launches
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
 		// Prepare MediaPlayer
@@ -63,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 		playSongButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (mediaPlayer.isPlaying()){
+				if (mediaPlayer.isPlaying()) {
 					mediaPlayer.pause();
 					playSongButton.setBackgroundResource(R.drawable.ic_pause_black_24dp);
 				} else {
@@ -73,12 +78,12 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+		// Set seek bar for volume
+		final AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		SeekBar volumeBar = findViewById(R.id.skbVolume);
 		volumeBar.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
 		volumeBar.setProgress(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
-		volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
-		{
+		volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(SeekBar arg0) {
 				// NO OP
@@ -98,12 +103,15 @@ public class MainActivity extends AppCompatActivity {
 
 	}
 
+	// Operations to enable music playing
 	Session.SessionListener sessionListener = new Session.SessionListener() {
 		@Override
 		public void playScore(Score score, Boolean currentPlaylist) {
 
+			// Allow play and pause button to be seen
 			playControls.setVisibility(View.VISIBLE);
 
+			// Set text fields to show what song is being played
 			TextView playSong = findViewById(R.id.playSong);
 			playSong.setText(score.song.title);
 
@@ -113,30 +121,36 @@ public class MainActivity extends AppCompatActivity {
 			TextView playAlbum = findViewById(R.id.playAlbum);
 			playAlbum.setText(score.release.name);
 
-			if (currentSongId == R.raw.champion){
+			// Toggle between two songs
+			if (currentSongId == R.raw.happy) {
 				currentSongId = R.raw.dancingqueen;
 			} else {
-				currentSongId = R.raw.champion;
+				currentSongId = R.raw.happy;
 			}
+			//Read in song and play
 			AssetFileDescriptor afd = getResources().openRawResourceFd(currentSongId);
 			try {
 				mediaPlayer.reset();
 				mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
 				mediaPlayer.prepare();
 				mediaPlayer.start();
-			}
-			catch (IOException e){
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
 		}
 	};
 
-	// Read scores from Json file and load into an ArrayList of scores
+	/**
+	 * Read artist, song, and album into a Score and create an arraylist of all scores
+	 * to be displayed.
+	 * @return List of scores
+	 */
 	private ArrayList<Score> loadScores() {
 
 		ArrayList<Score> scores = new ArrayList<>();
 		try {
+			// Read in Json file with Gson
 			InputStream is = getAssets().open("music.json");
 			JsonReader jsonReader = new JsonReader(new InputStreamReader(is, "UTF-8"));
 
@@ -159,7 +173,9 @@ public class MainActivity extends AppCompatActivity {
 		return null;
 	}
 
-	// Enable navigation on the bottom navigation bar
+	/**
+	 * Enable navigation on bottom bar.
+	 */
 	private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener
 			= new BottomNavigationView.OnNavigationItemSelectedListener() {
 

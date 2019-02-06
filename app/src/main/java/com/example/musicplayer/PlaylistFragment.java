@@ -14,6 +14,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/**
+ * Class showing list of scores in selected playlist
+ */
+
 public class PlaylistFragment extends Fragment {
 	public interface PlaylistFragmentListener {
 		void onGoBack();

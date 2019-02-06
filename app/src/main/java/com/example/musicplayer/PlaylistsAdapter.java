@@ -12,6 +12,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/**
+ * Adapter for playlists
+ */
 public class PlaylistsAdapter extends ArrayAdapter<Playlist> {
 
 	private Context context;
@@ -36,6 +39,7 @@ public class PlaylistsAdapter extends ArrayAdapter<Playlist> {
 		playlistName.setText(playlist.name);
 
 
+		// Delete a playlist with trash icon button
 		Button deletePlaylistButton = convertView.findViewById(R.id.deletePlaylist);
 		deletePlaylistButton.setOnClickListener(new View.OnClickListener() {
 			@Override

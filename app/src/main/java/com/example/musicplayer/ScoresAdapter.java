@@ -3,31 +3,42 @@ package com.example.musicplayer;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import java.util.ArrayList;
 
-public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
+
+/**
+ * Adapter for scores that are in the music fragment and playlist fragment
+ */
+public class ScoresAdapter extends ArrayAdapter<Score> {
 
 	private Context context;
+
 	private Boolean removeButtonVisible = false;
 	private Boolean addButtonVisible = true;
+
+	private Filter filter;
+	private ArrayList<Score> scores;
 
 	public ScoresAdapter(Context context, ArrayList<Score> scores) {
 		super(context, 0, scores);
 		this.context = context;
+		this.scores = scores;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+
 		//Get data item for this position
 		final Score score = getItem(position);
 
@@ -111,31 +122,59 @@ public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 		addButtonVisible = isVisible;
 	}
 
+	/**
+	 * Get filter results to be listed on music fragment
+	 *
+	 * @return Filter list view of results
+	 */
 	@Override
 	public Filter getFilter() {
-		Filter filter = new Filter() {
+		if (this.filter == null) {
+			this.filter = new ScoreFilter(this.scores);
+		}
+		return this.filter;
+	}
 
-			@SuppressWarnings("unchecked")
-			@Override
-			protected void publishResults(CharSequence constraint, FilterResults results) {
-				ArrayList<Score> filteredScores = (ArrayList<Score>) results.values;
-				notifyDataSetChanged();
-				clear();
-				for (int i = 0, l = filteredScores.size(); i < l; i++) {
-					add(filteredScores.get(i));
-				}
-				notifyDataSetInvalidated();
+	private class ScoreFilter extends Filter {
+		private ArrayList<Score> sourceScores;
+
+		ScoreFilter(ArrayList<Score> scores) {
+			sourceScores = new ArrayList<>();
+			sourceScores.addAll(scores);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void publishResults(CharSequence constraint, FilterResults results) {
+			ArrayList<Score> filteredScore = (ArrayList<Score>) results.values;
+			notifyDataSetChanged();
+			clear();
+			for (int i = 0, l = filteredScore.size(); i < l; i++) {
+				add(filteredScore.get(i));
 			}
+			notifyDataSetInvalidated();
+		}
 
-			@Override
-			protected FilterResults performFiltering(CharSequence constraint) {
+		/**
+		 * Perform filtering on list view of scores as user enters constraint text
+		 *
+		 * @param constraint input from user
+		 * @return Results of the scores adhering to the constraint
+		 */
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) {
 
-				FilterResults results = new FilterResults();
-				// perform your search here using the searchConstraint String.
+			FilterResults results = new FilterResults();
+
+			// perform your search here using the searchConstraint String.
+			if (TextUtils.isEmpty(constraint)) {
+				results.count = sourceScores.size();
+				results.values = sourceScores;
+			} else {
+
 				ArrayList<Score> filteredScores = new ArrayList<>();
 				String filter = constraint.toString().toLowerCase();
-				for (int i = 0; i < Session.scores.size(); i++) {
-					Score score = Session.scores.get(i);
+				for (Score score : sourceScores) {
 					String songTitle = score.song.title.toLowerCase();
 					if (songTitle.indexOf(filter) >= 0) {
 						filteredScores.add(score);
@@ -152,14 +191,11 @@ public class ScoresAdapter extends ArrayAdapter<Score> implements Filterable {
 						continue;
 					}
 				}
-
 				results.count = filteredScores.size();
 				results.values = filteredScores;
-
-				return results;
 			}
-		};
-		return filter;
-	}
 
+			return results;
+		}
+	}
 }

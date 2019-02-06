@@ -19,6 +19,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/**
+ * Class showing list of playlists attainable from navigation bar.
+ */
 public class PlaylistsFragment extends Fragment {
 
 	public interface PlaylistsFragmentListener {
@@ -52,6 +55,9 @@ public class PlaylistsFragment extends Fragment {
 		return view;
 	}
 
+	/**
+	 * Get playlist from sessions. List of playlists depends on user
+	 */
 	ListView.OnItemClickListener listItemListener = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -59,7 +65,11 @@ public class PlaylistsFragment extends Fragment {
 		}
 	};
 
-	View.OnClickListener addPlaylistListener =  new View.OnClickListener(){
+	/**
+	 * Add a playlist by tapping plus icon. User will enter the name of the playlist
+	 * and be prompted to accept or cancel.
+	 */
+	View.OnClickListener addPlaylistListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -74,7 +84,7 @@ public class PlaylistsFragment extends Fragment {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					String name = input.getText().toString();
-					if (name.length() <= 0){
+					if (name.length() <= 0) {
 						dialog.cancel();
 						return;
 					}

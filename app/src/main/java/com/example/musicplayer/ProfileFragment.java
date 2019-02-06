@@ -10,6 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+/**
+ * Class that shows the profiles of each user
+ */
 public class ProfileFragment extends Fragment {
 
 	FragmentManager fragmentManager;
@@ -22,6 +25,7 @@ public class ProfileFragment extends Fragment {
 
 		fragmentManager = getFragmentManager();
 
+		// Add playlists that correspond to each user
 		PlaylistsFragment playlistsFragment = new PlaylistsFragment();
 		playlistsFragment.setPlaylistsFragmentListener(new PlaylistsFragment.PlaylistsFragmentListener() {
 			@Override
@@ -34,6 +38,11 @@ public class ProfileFragment extends Fragment {
 		return view;
 	}
 
+	/**
+	 * When a playlist is tapped it will go to the playlist fragment and a back button arrow
+	 * will give users option to go back
+	 * @param playlist
+	 */
 	private void showPlaylist(Playlist playlist) {
 		Session.setCurrentPlaylist(playlist);
 		PlaylistFragment playlistFragment = new PlaylistFragment();
@@ -46,6 +55,9 @@ public class ProfileFragment extends Fragment {
 		fragmentManager.beginTransaction().replace(R.id.fragment_container, playlistFragment).commit();
 	}
 
+	/**
+	 * Show list of playlists
+	 */
 	private void showPlaylists() {
 		Session.setCurrentPlaylist(null);
 		PlaylistsFragment playlistsFragment = new PlaylistsFragment();

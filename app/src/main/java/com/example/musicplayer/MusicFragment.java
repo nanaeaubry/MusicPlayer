@@ -18,21 +18,23 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Class for music list page
+ */
 public class MusicFragment extends Fragment  {
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_music, container, false);
-
+		// Get scores to load into listview
 		final ScoresAdapter scoresAdapter = new ScoresAdapter(getActivity(), Session.scores);
-
 
 		ListView listView = view.findViewById(R.id.musicListView);
 		listView.setAdapter(scoresAdapter);
 		listView.setOnItemClickListener(listItemListener);
 
+		// Set up filter for score list
 		EditText inputFilter = view.findViewById(R.id.inputFilter);
 		inputFilter.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -54,6 +56,9 @@ public class MusicFragment extends Fragment  {
 		return view;
 	}
 
+	/**
+	 * When score is clicked or tapped a song will play
+	 */
 	ListView.OnItemClickListener listItemListener = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
