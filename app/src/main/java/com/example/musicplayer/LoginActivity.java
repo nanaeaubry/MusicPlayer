@@ -206,7 +206,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 	}
 
 	private boolean isPasswordValid(String password) {
-
 		return true;
 	}
 
@@ -330,12 +329,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		protected User doInBackground(Void... params) {
 
 			for (User user : Session.users) {
-//				if (user.id.equals(mEmail) && user.password.equals(mPassword)) {
-				if (user.id.equals(mEmail)) {
+				if (user.id.equals(mEmail) && user.password.equals(mPassword)) {
 					return user;
+
 				}
 			}
-
 			return null;
 		}
 

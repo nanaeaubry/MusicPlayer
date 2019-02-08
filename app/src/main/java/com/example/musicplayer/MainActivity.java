@@ -131,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
 			AssetFileDescriptor afd = getResources().openRawResourceFd(currentSongId);
 			try {
 				mediaPlayer.reset();
+
+				// TODO Replace with input stream
 				mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
 				mediaPlayer.prepare();
 				mediaPlayer.start();
