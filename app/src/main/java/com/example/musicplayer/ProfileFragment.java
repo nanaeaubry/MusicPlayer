@@ -8,7 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+
 
 /**
  * Class that shows the profiles of each user
@@ -25,12 +25,11 @@ public class ProfileFragment extends Fragment {
 
 		fragmentManager = getFragmentManager();
 
-		// Add playlists that correspond to each user
 		PlaylistsFragment playlistsFragment = new PlaylistsFragment();
 		playlistsFragment.setPlaylistsFragmentListener(new PlaylistsFragment.PlaylistsFragmentListener() {
 			@Override
-			public void onShowPlaylist(Playlist playlist) {
-				showPlaylist(playlist);
+			public void onShowPlaylist(String playlistName) {
+				showPlaylist(playlistName);
 			}
 		});
 
@@ -41,11 +40,11 @@ public class ProfileFragment extends Fragment {
 	/**
 	 * When a playlist is tapped it will go to the playlist fragment and a back button arrow
 	 * will give users option to go back
-	 * @param playlist
+	 * @param playlistName
 	 */
-	private void showPlaylist(Playlist playlist) {
-		Session.setCurrentPlaylist(playlist);
+	private void showPlaylist(String playlistName) {
 		PlaylistFragment playlistFragment = new PlaylistFragment();
+		playlistFragment.setPlaylistName(playlistName);
 		playlistFragment.setPlaylistFragmentListener(new PlaylistFragment.PlaylistFragmentListener() {
 			@Override
 			public void onGoBack() {
@@ -59,11 +58,10 @@ public class ProfileFragment extends Fragment {
 	 * Show list of playlists
 	 */
 	private void showPlaylists() {
-		Session.setCurrentPlaylist(null);
 		PlaylistsFragment playlistsFragment = new PlaylistsFragment();
 		playlistsFragment.setPlaylistsFragmentListener(new PlaylistsFragment.PlaylistsFragmentListener() {
 			@Override
-			public void onShowPlaylist(Playlist playlist) {
+			public void onShowPlaylist(String playlist) {
 				showPlaylist(playlist);
 			}
 		});

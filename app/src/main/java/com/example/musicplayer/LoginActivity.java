@@ -30,13 +30,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +62,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 	private UserLoginTask mAuthTask = null;
 
 	// UI references.
+	private EditText mServerIp;
 	private AutoCompleteTextView mEmailView;
 	private EditText mPasswordView;
 	private View mProgressView;
@@ -76,6 +73,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_login);
+		mServerIp = (EditText) findViewById(R.id.serverIp);
+
 		// Set up the login form.
 		mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 		populateAutoComplete();
@@ -163,11 +162,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		mPasswordView.setError(null);
 
 		// Store values at the time of the login attempt.
+		String serverIp = mServerIp.getText().toString();
+		Session.serverIp = serverIp;
 		String email = mEmailView.getText().toString();
 		String password = mPasswordView.getText().toString();
 
 		boolean cancel = false;
 		View focusView = null;
+
+		if (TextUtils.isEmpty(serverIp)) {
+			mServerIp.setError(getString(R.string.error_invalid_server_ip));
+			focusView = mServerIp;
+			cancel = true;
+		}
 
 		// Check for a valid password, if the user entered one.
 		if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
@@ -299,8 +306,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		int IS_PRIMARY = 1;
 	}
 
-	private void success(User user) {
-		Session.setCurrentUser(user);
+	private void success(String userId) {
+		Session.userId = userId;
 		Intent intent = new Intent(this, MainActivity.class);
 		this.startActivity(intent);
 	}
@@ -315,7 +322,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
 	 */
-	public class UserLoginTask extends AsyncTask<Void, Void, User> {
+	public class UserLoginTask extends AsyncTask<Void, Void, String> {
 
 		private final String mEmail;
 		private final String mPassword;
@@ -326,23 +333,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 		}
 
 		@Override
-		protected User doInBackground(Void... params) {
+		protected String doInBackground(Void... params) {
 
-			for (User user : Session.users) {
-				if (user.id.equals(mEmail) && user.password.equals(mPassword)) {
-					return user;
+			JsonObject request = new JsonObject();
+			request.addProperty("serviceName", "LoginService");
+			request.addProperty("methodName", "login");
+			JsonObject param = new JsonObject();
+			param.addProperty("username", mEmail);
+			param.addProperty("password", mPassword);
+			request.add("param", param);
 
-				}
-			}
-			return null;
+			UDPConnection connection = new UDPConnection(Session.serverIp, Session.serverPort);
+			JsonObject response = connection.execute(request);
+			return response.get("ret").getAsString();
 		}
 
 		@Override
-		protected void onPostExecute(final User user) {
+		protected void onPostExecute(final String userId) {
 			mAuthTask = null;
 
-			if (user != null) {
-				success(user);
+			if (!TextUtils.isEmpty(userId)) {
+				success(userId);
 			} else {
 				failure();
 			}

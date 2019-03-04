@@ -4,8 +4,8 @@ package com.example.musicplayer;
  */
 
 public class Score {
-	public Release release;
-	public Artist artist;
-	public Song song;
-
+	public String id;
+	public String title;
+	public String artist;
+	public String album;
 }

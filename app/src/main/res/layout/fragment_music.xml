@@ -24,17 +24,17 @@
 		</EditText>
 
 		<Button
-			android:id="@+id/btnSearch"
+			android:id="@+id/btnFilter"
 			android:layout_width="40dp"
 			android:layout_height="40dp"
 			android:background="@drawable/ic_search_black_24dp"
 			android:padding="10dp"
-			android:enabled="false"/>
+			android:enabled="true"/>
 
 	</LinearLayout>
 
-	<ListView
-		android:id="@+id/musicListView"
+	<android.support.v7.widget.RecyclerView
+		android:id="@+id/musicRecyclerView"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:clickable="true"

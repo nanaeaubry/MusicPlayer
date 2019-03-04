@@ -2,14 +2,16 @@ package com.example.musicplayer;
 
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -18,14 +20,15 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
+import com.google.gson.JsonObject;
 
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.io.OutputStream;
+import java.util.Base64;
 
 /**
  * The main page.
@@ -33,10 +36,15 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+	private static String[] songs = {"dancingqueen.mp3", "happy.mp3"};
+
 	// Song playing properties
-	private MediaPlayer mediaPlayer;
 	private LinearLayout playControls;
-	private int currentSongId = R.raw.happy;
+
+	private MediaPlayer mediaPlayer = new MediaPlayer();
+	private BufferSongTask bufferSongTask = null;
+
+	private String songPlayed = "dancingqueen.mp3";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,18 +53,12 @@ public class MainActivity extends AppCompatActivity {
 		// Hide keyboard when app launches
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-		// Prepare MediaPlayer
-		mediaPlayer = new MediaPlayer();
-
 		// Listen to play score event on Session
-		Session.setSessionListener(sessionListener);
+		Session.setPlayScoreListener(playScoreListener);
 
 		// Load bottom navigation bar
 		BottomNavigationView navigation = findViewById(R.id.navigation);
 		navigation.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
-
-		// Reading scores and loading into list view
-		Session.scores = loadScores();
 
 		// Music Fragment will open first
 		MusicFragment musicFragment = new MusicFragment();
@@ -99,81 +101,43 @@ public class MainActivity extends AppCompatActivity {
 				audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, arg1, 0);
 			}
 		});
-
-
 	}
 
 	// Operations to enable music playing
-	Session.SessionListener sessionListener = new Session.SessionListener() {
+	Session.PlayScoreListener playScoreListener = new Session.PlayScoreListener() {
 		@Override
-		public void playScore(Score score, Boolean currentPlaylist) {
+		public void onPlayScore(Score score) {
+
+			mediaPlayer.reset();
 
 			// Allow play and pause button to be seen
 			playControls.setVisibility(View.VISIBLE);
 
 			// Set text fields to show what song is being played
 			TextView playSong = findViewById(R.id.playSong);
-			playSong.setText(score.song.title);
+			playSong.setText(score.title);
 
 			TextView playArtist = findViewById(R.id.playArtist);
-			playArtist.setText(score.artist.name);
+			playArtist.setText(score.artist);
 
 			TextView playAlbum = findViewById(R.id.playAlbum);
-			playAlbum.setText(score.release.name);
+			playAlbum.setText(score.album);
 
-			// Toggle between two songs
-			if (currentSongId == R.raw.happy) {
-				currentSongId = R.raw.dancingqueen;
-			} else {
-				currentSongId = R.raw.happy;
+			if (songPlayed == songs[0]){
+				songPlayed = songs[1];
 			}
-			//Read in song and play
-			AssetFileDescriptor afd = getResources().openRawResourceFd(currentSongId);
-			try {
-				mediaPlayer.reset();
-
-				// TODO Replace with input stream
-				mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-				mediaPlayer.prepare();
-				mediaPlayer.start();
-			} catch (IOException e) {
-				e.printStackTrace();
+			else {
+				songPlayed = songs[0];
 			}
 
+			if (bufferSongTask != null) {
+				bufferSongTask.cancel(true);
+			}
+
+			bufferSongTask = new BufferSongTask(getApplicationContext(), songPlayed);
+			bufferSongTask.execute();
 		}
 	};
-
-	/**
-	 * Read artist, song, and album into a Score and create an arraylist of all scores
-	 * to be displayed.
-	 * @return List of scores
-	 */
-	private ArrayList<Score> loadScores() {
-
-		ArrayList<Score> scores = new ArrayList<>();
-		try {
-			// Read in Json file with Gson
-			InputStream is = getAssets().open("music.json");
-			JsonReader jsonReader = new JsonReader(new InputStreamReader(is, "UTF-8"));
-
-			Gson gson = new Gson();
-
-			jsonReader.beginArray();
-
-			while (jsonReader.hasNext()) {
-				Score score = gson.fromJson(jsonReader, Score.class);
-				scores.add(score);
-			}
-			jsonReader.close();
-			return scores;
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	/**
 	 * Enable navigation on bottom bar.
@@ -196,4 +160,118 @@ public class MainActivity extends AppCompatActivity {
 			return true;
 		}
 	};
+
+	class BufferSongTask extends AsyncTask<Void, Integer, Boolean> {
+
+		private Context context;
+		private String filename;
+		private File tmpFile = null;
+		private FileOutputStream tmpOutputStream = null;
+		private FileInputStream tmpInputStream = null;
+		private Boolean playerInitialized = false;
+
+		public BufferSongTask(Context context, String filename) {
+			this.context = context;
+			this.filename = filename;
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... voids) {
+
+			try {
+				tmpFile = File.createTempFile("song", ".mp3", context.getCacheDir());
+				tmpFile.deleteOnExit();
+
+				tmpInputStream = new FileInputStream(tmpFile);
+				tmpOutputStream = new FileOutputStream(tmpFile);
+
+				UDPConnection connection = new UDPConnection(Session.serverIp, Session.serverPort);
+				int fragment = 0;
+				do {
+					if (this.isCancelled()) {
+						return false;
+					}
+
+					JsonObject request = new JsonObject();
+					request.addProperty("serviceName", "SongService");
+					request.addProperty("methodName", "getSongChunk");
+					JsonObject param = new JsonObject();
+					param.addProperty("key", filename);
+					param.addProperty("fragment", fragment);
+					request.add("param", param);
+
+					JsonObject response = connection.execute(request);
+
+					String s = response.get("ret").getAsString();
+					if (TextUtils.isEmpty(s)) {
+						return true;
+					}
+
+					byte[] buff = Base64.getDecoder().decode(s);
+					tmpOutputStream.write(buff);
+					tmpOutputStream.flush();
+
+					publishProgress(fragment);
+
+					fragment++;
+				} while (true);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					// Not closing the inputStream, the mediaPlayer is using it
+//					if (tmpInputStream != null) {
+//						tmpInputStream.close();
+//					}
+					if (tmpOutputStream != null) {
+						tmpOutputStream.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+
+			return null;
+		}
+
+//		@Override
+//		protected void onProgressUpdate(Integer... args) {
+//			final int fragment = args[0];
+//			if (fragment < 200) {
+//				return;
+//			}
+//
+//			initializePlayer();
+//		}
+
+		@Override
+		protected void onPostExecute(Boolean aBoolean) {
+			Log.d("MainActivity", "Size: " + tmpFile.length());
+			initializePlayer();
+		}
+
+		void initializePlayer() {
+			if (playerInitialized) {
+				return;
+			}
+
+			playerInitialized = true;
+			try {
+				mediaPlayer.setDataSource(tmpInputStream.getFD());
+				mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+					@Override
+					public void onPrepared(MediaPlayer mp) {
+						Log.d("MainActivity", "Player Start");
+						mp.start();
+					}
+				});
+				mediaPlayer.prepareAsync();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 }

@@ -1,16 +1,26 @@
 package com.example.musicplayer;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+
 import android.widget.Button;
-import android.widget.ListView;
+
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 
 import java.util.ArrayList;
 
@@ -19,12 +29,20 @@ import java.util.ArrayList;
  */
 
 public class PlaylistFragment extends Fragment {
+
+
 	public interface PlaylistFragmentListener {
 		void onGoBack();
 	}
 
+	private String playlistName;
 	private PlaylistFragmentListener listener;
 	private ArrayList<Score> scores;
+	private MusicAdapter musicAdapter;
+
+	public void setPlaylistName(String name) {
+		this.playlistName = name;
+	}
 
 	@Nullable
 	@Override
@@ -32,7 +50,7 @@ public class PlaylistFragment extends Fragment {
 		View view = inflater.inflate(R.layout.fragment_playlist, container, false);
 
 		TextView playlistName = view.findViewById(R.id.playlistName);
-		playlistName.setText(Session.getCurrentPlaylist().name);
+		playlistName.setText(this.playlistName);
 
 		Button goBackButton = view.findViewById(R.id.goBackButton);
 		goBackButton.setOnClickListener(new View.OnClickListener() {
@@ -42,27 +60,127 @@ public class PlaylistFragment extends Fragment {
 			}
 		});
 
-		scores = Session.getCurrentPlaylistScores();
-		ScoresAdapter scoresAdapter = new ScoresAdapter(getActivity(), scores);
-		scoresAdapter.setAddButtonVisible(false);
-		scoresAdapter.setRemoveButtonVisible(true);
+		scores = new ArrayList<>();
+		musicAdapter = new MusicAdapter(
+				scores,
+				null,
+				itemClickListener,
+				null,
+				deleteSongFromPlaylistListener);
 
-		ListView listView = view.findViewById(R.id.musicListView);
-		listView.setAdapter(scoresAdapter);
-		listView.setOnItemClickListener(listItemListener);
+		RecyclerView recyclerView = view.findViewById(R.id.musicRecyclerView);
+		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+		recyclerView.setAdapter(musicAdapter);
+
+		LoadScoresTask task = new LoadScoresTask();
+		task.execute();
 
 		return view;
 	}
+
+	RecyclerViewItemClickListener itemClickListener = new RecyclerViewItemClickListener() {
+		@Override
+		public void onClick(View v, int position) {
+			Score score = scores.get(position);
+			Session.playScore(score);
+		}
+	};
+
+	ScoreItemActionListener deleteSongFromPlaylistListener = new ScoreItemActionListener() {
+		@Override
+		public void onClick(View v, Score score) {
+			DeleteSongFromPlaylistTask task = new DeleteSongFromPlaylistTask(v.getContext(), playlistName, score);
+			task.execute();
+		}
+	};
 
 	public void setPlaylistFragmentListener(PlaylistFragmentListener listener) {
 		this.listener = listener;
 	}
 
-	ListView.OnItemClickListener listItemListener = new AdapterView.OnItemClickListener() {
+	private void scoresLoaded(ArrayList<Score> scores) {
+		this.scores.addAll(scores);
+		musicAdapter.notifyDataSetChanged();
+	}
+
+	class LoadScoresTask extends AsyncTask<Void, Void, ArrayList<Score>> {
+
 		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			Session.playScore(scores.get(position), true);
+		protected ArrayList<Score> doInBackground(Void... voids) {
+			JsonObject request = new JsonObject();
+			request.addProperty("serviceName", "UserService");
+			request.addProperty("methodName", "getPlaylistSongs");
+			JsonObject param = new JsonObject();
+			param.addProperty("userId", Session.userId);
+			param.addProperty("name", playlistName);
+			request.add("param", param);
+
+			UDPConnection connection = new UDPConnection(Session.serverIp, Session.serverPort);
+			JsonObject response = connection.execute(request);
+			JsonArray arr = response.get("ret").getAsJsonArray();
+
+			Gson gson = new Gson();
+			ArrayList<Score> scores = new ArrayList<>();
+			for (int i = 0; i < arr.size(); i++) {
+				scores.add(gson.fromJson(arr.get(i), Score.class));
+			}
+			return scores;
 		}
-	};
+
+		@Override
+		protected void onPostExecute(final ArrayList<Score> scores) {
+			scoresLoaded(scores);
+		}
+	}
+
+	private void songDeletedFromPlaylist(Context context, Score score) {
+		scores.remove(score);
+		musicAdapter.notifyDataSetChanged();
+		Toast.makeText(context, "Removed: " + score.title, Toast.LENGTH_SHORT).show();
+	}
+
+	class DeleteSongFromPlaylistTask extends AsyncTask<Void, Void, Boolean> {
+
+		private Context context;
+		private final String playlistName;
+		private final Score score;
+
+		public DeleteSongFromPlaylistTask(Context context, String playlistName, Score score) {
+			this.context = context;
+			this.playlistName = playlistName;
+			this.score = score;
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... voids) {
+			JsonObject request = new JsonObject();
+			request.addProperty("serviceName", "UserService");
+			request.addProperty("methodName", "deletePlaylistSong");
+			JsonObject param = new JsonObject();
+			param.addProperty("userId", Session.userId);
+			param.addProperty("name", playlistName);
+			param.addProperty("songId", score.id);
+			request.add("param", param);
+
+			UDPConnection connection = new UDPConnection(Session.serverIp, Session.serverPort);
+			JsonObject response = connection.execute(request);
+			return response.get("ret").getAsBoolean();
+
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean result) {
+			if (result) {
+				songDeletedFromPlaylist(context, score);
+			}
+		}
+
+	}
+//	ListView.OnItemClickListener listItemListener = new AdapterView.OnItemClickListener() {
+//		@Override
+//		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//			Session.playScore(scores.get(position), true);
+//		}
+//	};
 
 }

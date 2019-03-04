@@ -1,56 +1,61 @@
 package com.example.musicplayer;
 
 import android.app.AlertDialog;
-import android.content.Context;
+
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
 
 /**
  * Class showing list of playlists attainable from navigation bar.
  */
 public class PlaylistsFragment extends Fragment {
 
+	private PlaylistsAdapter playlistsAdapter;
+	private ArrayList<String> playlists;
+
 	public interface PlaylistsFragmentListener {
-		void onShowPlaylist(Playlist playlist);
+		void onShowPlaylist(String playlist);
 	}
 
 	private PlaylistsFragmentListener listener;
-	private Context context;
+
 
 	@Nullable
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-		this.context = container.getContext();
-
 		View view = inflater.inflate(R.layout.fragment_playlists, container, false);
-
-		TextView currentUserName = view.findViewById(R.id.currentUserName);
-		User user = Session.getCurrentUser();
-		currentUserName.setText(user.firstName + " " + user.lastName);
 
 		Button addPlaylistButton = view.findViewById(R.id.addPlaylist);
 		addPlaylistButton.setOnClickListener(addPlaylistListener);
 
-		PlaylistsAdapter playlistsAdapter = new PlaylistsAdapter(getActivity(), Session.getPlaylists());
+		playlists = new ArrayList<>();
+		playlistsAdapter = new PlaylistsAdapter(playlists, itemClickListener);
 
-		ListView listView = view.findViewById(R.id.playlistsView);
-		listView.setAdapter(playlistsAdapter);
-		listView.setOnItemClickListener(listItemListener);
+		RecyclerView recyclerView = view.findViewById(R.id.playlistsRecyclerView);
+		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+		recyclerView.setAdapter(playlistsAdapter);
+
+		LoadPlaylistsTask task = new LoadPlaylistsTask();
+		task.execute();
 
 		return view;
 	}
@@ -58,10 +63,11 @@ public class PlaylistsFragment extends Fragment {
 	/**
 	 * Get playlist from sessions. List of playlists depends on user
 	 */
-	ListView.OnItemClickListener listItemListener = new AdapterView.OnItemClickListener() {
+	RecyclerViewItemClickListener itemClickListener = new RecyclerViewItemClickListener() {
 		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			listener.onShowPlaylist(Session.getPlaylists().get(position));
+		public void onClick(View v, int position) {
+			String playlistName = playlists.get(position);
+			listener.onShowPlaylist(playlistName);
 		}
 	};
 
@@ -72,10 +78,10 @@ public class PlaylistsFragment extends Fragment {
 	View.OnClickListener addPlaylistListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
 			builder.setTitle("Enter Playlist Name");
 
-			final EditText input = new EditText(context);
+			final EditText input = new EditText(v.getContext());
 			input.setInputType(InputType.TYPE_CLASS_TEXT);
 
 			builder.setView(input);
@@ -88,11 +94,9 @@ public class PlaylistsFragment extends Fragment {
 						dialog.cancel();
 						return;
 					}
+					SavePlaylistTask task = new SavePlaylistTask(name);
+					task.execute();
 
-					Playlist playlist = new Playlist();
-					playlist.name = name;
-					Session.getPlaylists().add(playlist);
-					Session.saveUsers();
 				}
 			});
 
@@ -111,6 +115,85 @@ public class PlaylistsFragment extends Fragment {
 
 	public void setPlaylistsFragmentListener(PlaylistsFragmentListener listener) {
 		this.listener = listener;
+	}
+
+	private void playlistsLoaded(ArrayList<String> playlists) {
+		this.playlists.addAll(playlists);
+		playlistsAdapter.notifyDataSetChanged();
+	}
+
+
+	class LoadPlaylistsTask extends AsyncTask<Void, Void, ArrayList<String>> {
+
+
+		@Override
+		protected ArrayList<String> doInBackground(Void... voids) {
+			JsonObject request = new JsonObject();
+			request.addProperty("serviceName", "UserService");
+			request.addProperty("methodName", "getPlaylists");
+			JsonObject param = new JsonObject();
+			param.addProperty("userId", Session.userId);
+			request.add("param", param);
+
+			UDPConnection connection = new UDPConnection(Session.serverIp, Session.serverPort);
+			JsonObject response = connection.execute(request);
+			JsonArray arr = response.get("ret").getAsJsonArray();
+
+			Gson gson = new Gson();
+			ArrayList<String> playlistNames = new ArrayList<>();
+			for (int i = 0; i < arr.size(); i++) {
+				playlistNames.add(arr.get(i).getAsJsonObject().get("name").getAsString());
+			}
+			return playlistNames;
+		}
+
+		@Override
+		protected void onPostExecute(final ArrayList<String> playlistNames) {
+			playlistsLoaded(playlistNames);
+		}
+	}
+
+	private void playlistSaved(String playlist) {
+		if (this.playlists.contains(playlist)) {
+			return;
+		}
+		this.playlists.add(0, playlist);
+		playlistsAdapter.notifyDataSetChanged();
+	}
+
+	class SavePlaylistTask extends AsyncTask<Void, Void, String> {
+
+		private String playlistName;
+
+		public SavePlaylistTask(String playlistName) {
+			this.playlistName = playlistName;
+		}
+
+		@Override
+		protected String doInBackground(Void... voids) {
+			JsonObject request = new JsonObject();
+			request.addProperty("serviceName", "UserService");
+			request.addProperty("methodName", "createPlaylist");
+			JsonObject param = new JsonObject();
+			param.addProperty("userId", Session.userId);
+			param.addProperty("name", playlistName);
+			request.add("param", param);
+
+			UDPConnection connection = new UDPConnection(Session.serverIp, Session.serverPort);
+			JsonObject response = connection.execute(request);
+			if (response.get("ret").getAsBoolean()) {
+				return playlistName;
+			}
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String playlistName) {
+			if (playlistName != null) {
+				playlistSaved(playlistName);
+			}
+		}
 	}
 
 }

@@ -38,8 +38,8 @@
 	</LinearLayout>
 
 
-	<ListView
-		android:id="@+id/playlistsView"
+	<android.support.v7.widget.RecyclerView
+		android:id="@+id/playlistsRecyclerView"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/userPlaylists"
