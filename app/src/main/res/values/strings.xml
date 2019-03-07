@@ -6,6 +6,7 @@
 	<string name="title_activity_main">main</string>
 	<string name="title_music_list">Music</string>
 	<string name="title_playlists">Playlists</string>
+	<string name="username">My Playlists</string>
 	<string name="search_input">Song, Artist, or Album</string>
 	<string name="title_activity_login">Sign in</string>
 	<!-- Strings related to login -->

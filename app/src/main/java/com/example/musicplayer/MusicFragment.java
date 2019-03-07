@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -37,6 +39,9 @@ public class MusicFragment extends Fragment {
 	ArrayList<String> playlistNames;
 
 	EditText inputFilter;
+	RecyclerView recyclerView;
+	LinearLayout searchView;
+	ProgressBar progressBar;
 
 	String filter = null;
 
@@ -54,9 +59,12 @@ public class MusicFragment extends Fragment {
 				addSongToPlaylistListener,
 				null);
 
-		RecyclerView recyclerView = view.findViewById(R.id.musicRecyclerView);
+		recyclerView = view.findViewById(R.id.musicRecyclerView);
 		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 		recyclerView.setAdapter(musicAdapter);
+
+		searchView = view.findViewById(R.id.searchView);
+		progressBar = view.findViewById(R.id.music_progress);
 
 		// Set up filter for score list
 		inputFilter = view.findViewById(R.id.inputFilter);
@@ -107,6 +115,9 @@ public class MusicFragment extends Fragment {
 		this.scores.addAll(scores);
 		musicAdapter.notifyDataSetChanged();
 		inputFilter.setEnabled(true);
+		progressBar.setVisibility(View.GONE);
+		searchView.setVisibility(View.VISIBLE);
+		recyclerView.setVisibility(View.VISIBLE);
 	}
 
 	RecyclerViewItemClickListener itemClickListener = new RecyclerViewItemClickListener() {

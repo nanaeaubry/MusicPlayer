@@ -26,8 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+
 import java.util.Base64;
 
 /**
@@ -236,21 +235,21 @@ public class MainActivity extends AppCompatActivity {
 			return null;
 		}
 
-//		@Override
-//		protected void onProgressUpdate(Integer... args) {
-//			final int fragment = args[0];
-//			if (fragment < 200) {
-//				return;
-//			}
-//
-//			initializePlayer();
-//		}
-
 		@Override
-		protected void onPostExecute(Boolean aBoolean) {
-			Log.d("MainActivity", "Size: " + tmpFile.length());
+		protected void onProgressUpdate(Integer... args) {
+			final int fragment = args[0];
+			if (fragment < 200) {
+				return;
+			}
+
 			initializePlayer();
 		}
+
+//		@Override
+//		protected void onPostExecute(Boolean aBoolean) {
+//			Log.d("MainActivity", "Size: " + tmpFile.length());
+//			initializePlayer();
+//		}
 
 		void initializePlayer() {
 			if (playerInitialized) {

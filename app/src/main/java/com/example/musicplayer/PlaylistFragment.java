@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 
 import android.widget.Button;
 
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +31,9 @@ import java.util.ArrayList;
  */
 
 public class PlaylistFragment extends Fragment {
-
+	RecyclerView recyclerView;
+	LinearLayout playlists;
+	ProgressBar progressBar;
 
 	public interface PlaylistFragmentListener {
 		void onGoBack();
@@ -68,9 +72,12 @@ public class PlaylistFragment extends Fragment {
 				null,
 				deleteSongFromPlaylistListener);
 
-		RecyclerView recyclerView = view.findViewById(R.id.musicRecyclerView);
+		recyclerView = view.findViewById(R.id.musicRecyclerView);
 		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 		recyclerView.setAdapter(musicAdapter);
+
+		playlists = view.findViewById(R.id.playlist);
+		progressBar = view.findViewById(R.id.playlist_progress);
 
 		LoadScoresTask task = new LoadScoresTask();
 		task.execute();
@@ -101,6 +108,9 @@ public class PlaylistFragment extends Fragment {
 	private void scoresLoaded(ArrayList<Score> scores) {
 		this.scores.addAll(scores);
 		musicAdapter.notifyDataSetChanged();
+		progressBar.setVisibility(View.GONE);
+		playlists.setVisibility(View.VISIBLE);
+		recyclerView.setVisibility(View.VISIBLE);
 	}
 
 	class LoadScoresTask extends AsyncTask<Void, Void, ArrayList<Score>> {
@@ -176,11 +186,5 @@ public class PlaylistFragment extends Fragment {
 		}
 
 	}
-//	ListView.OnItemClickListener listItemListener = new AdapterView.OnItemClickListener() {
-//		@Override
-//		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//			Session.playScore(scores.get(position), true);
-//		}
-//	};
 
 }

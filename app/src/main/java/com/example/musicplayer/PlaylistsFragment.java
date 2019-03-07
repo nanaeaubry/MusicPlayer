@@ -17,6 +17,9 @@ import android.view.ViewGroup;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -30,6 +33,10 @@ public class PlaylistsFragment extends Fragment {
 
 	private PlaylistsAdapter playlistsAdapter;
 	private ArrayList<String> playlists;
+	RecyclerView recyclerView;
+	LinearLayout userPlaylists;
+	ProgressBar progressBar;
+
 
 	public interface PlaylistsFragmentListener {
 		void onShowPlaylist(String playlist);
@@ -50,9 +57,12 @@ public class PlaylistsFragment extends Fragment {
 		playlists = new ArrayList<>();
 		playlistsAdapter = new PlaylistsAdapter(playlists, itemClickListener);
 
-		RecyclerView recyclerView = view.findViewById(R.id.playlistsRecyclerView);
+		recyclerView = view.findViewById(R.id.playlistsRecyclerView);
 		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 		recyclerView.setAdapter(playlistsAdapter);
+
+		userPlaylists = view.findViewById(R.id.userPlaylists);
+		progressBar = view.findViewById(R.id.playlists_progress);
 
 		LoadPlaylistsTask task = new LoadPlaylistsTask();
 		task.execute();
@@ -120,6 +130,9 @@ public class PlaylistsFragment extends Fragment {
 	private void playlistsLoaded(ArrayList<String> playlists) {
 		this.playlists.addAll(playlists);
 		playlistsAdapter.notifyDataSetChanged();
+		progressBar.setVisibility(View.GONE);
+		userPlaylists.setVisibility(View.VISIBLE);
+		recyclerView.setVisibility(View.VISIBLE);
 	}
 
 

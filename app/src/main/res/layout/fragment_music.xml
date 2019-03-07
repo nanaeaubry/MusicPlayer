@@ -4,10 +4,20 @@
 	android:layout_height="match_parent"
 	android:background="@android:color/transparent">
 
+	<ProgressBar
+		android:id="@+id/music_progress"
+		style="?android:attr/progressBarStyleLarge"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="8dp"
+		android:visibility="visible"
+		android:layout_centerInParent="true"/>
+
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:id="@+id/searchView">
+		android:id="@+id/searchView"
+		android:visibility="gone">
 
 		<TextView
 			android:id="@+id/tvwSeparator0"
@@ -40,6 +50,7 @@
 		android:clickable="true"
 		android:divider="#4D6D68"
 		android:dividerHeight="1dp"
-		android:layout_below="@id/searchView"/>
+		android:layout_below="@id/searchView"
+		android:visibility="gone"/>
 
 </RelativeLayout>

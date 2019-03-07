@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 
 /**
- * Class that shows the profiles of each user
+ * Class that holds the profiles of each user
  */
 public class ProfileFragment extends Fragment {
 

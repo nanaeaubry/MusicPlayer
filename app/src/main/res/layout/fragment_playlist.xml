@@ -4,10 +4,20 @@
 	android:layout_height="match_parent"
 	android:background="#63009688">
 
+	<ProgressBar
+		android:id="@+id/playlist_progress"
+		style="?android:attr/progressBarStyleLarge"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="8dp"
+		android:visibility="visible"
+		android:layout_centerInParent="true"/>
+
 	<LinearLayout
 		android:id="@+id/playlist"
 		android:layout_width="match_parent"
-		android:layout_height="60dp">
+		android:layout_height="60dp"
+		android:visibility="gone">
 
 		<Button
 			android:id="@+id/goBackButton"
@@ -42,6 +52,7 @@
 		android:layout_below="@id/playlist"
 		android:clickable="true"
 		android:divider="#4D6D68"
-		android:dividerHeight="1dp" />
+		android:dividerHeight="1dp"
+		android:visibility="gone"/>
 
 </RelativeLayout>

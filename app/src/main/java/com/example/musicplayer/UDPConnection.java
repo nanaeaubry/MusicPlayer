@@ -13,7 +13,6 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.time.Instant;
-import java.util.concurrent.TimeoutException;
 
 public class UDPConnection {
 
@@ -99,5 +98,5 @@ public class UDPConnection {
 		} while (true);
 
 	}
-}// End Class
+}
 
