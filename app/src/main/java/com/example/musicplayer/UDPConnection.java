@@ -59,7 +59,7 @@ public class UDPConnection {
 					byte[] responseData = new byte[MAX_DATAGRAM_SIZE];
 					responsePacket = new DatagramPacket(responseData, responseData.length);
 
-					socket.setSoTimeout(10000);
+//					socket.setSoTimeout(10000);
 					socket.receive(responsePacket);
 				}
 

@@ -1,6 +1,7 @@
 package com.example.musicplayer;
 
 
+
 import android.os.AsyncTask;
 
 import java.io.IOException;
@@ -97,6 +98,7 @@ public class SongInputStream extends InputStream {
 		pos++;
 		return buf[p] & 0xff;
 	}
+
 
 	/**
 	 * Reads some number of bytes from the input stream and stores them

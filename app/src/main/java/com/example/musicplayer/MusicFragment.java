@@ -92,6 +92,8 @@ public class MusicFragment extends Fragment {
 				inputFilter.setEnabled(false);
 
 				LoadScoresTask scoresTask = new LoadScoresTask(filter);
+				progressBar.setVisibility(View.VISIBLE);
+				recyclerView.setVisibility(View.GONE);
 				scoresTask.execute();
 
 			}
@@ -203,10 +205,12 @@ public class MusicFragment extends Fragment {
 			request.addProperty("serviceName", "CatalogService");
 			request.addProperty("methodName", "getSongs");
 			JsonObject param = new JsonObject();
-			param.addProperty("startIndex", 0);
-			param.addProperty("count", 100);
 			if (filter != null) {
 				param.addProperty("filter", filter);
+				param.addProperty("count", 10);
+
+			} else {
+				param.addProperty("count", 100);
 			}
 			request.add("param", param);
 
